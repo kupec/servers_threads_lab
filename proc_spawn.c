@@ -38,7 +38,7 @@ int main() {
         die("cannot listen socket");
     }
 
-    int worker_count = 2;
+    int worker_count = 16;
     pid_t pid_list[worker_count];
 
     for (int i = 0; i < worker_count; i++) {
@@ -60,7 +60,7 @@ int main() {
 
 void run_worker(int sockfd) {
     pid_t pid = getpid();
-    struct timespec delay = {0, 1 * 1000 * 1000};
+    //struct timespec delay = {0, 1 * 1000 * 1000};
 
     while (1) {
         //printf("[%d]: waiting for request\n", pid);
