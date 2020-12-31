@@ -1,4 +1,2 @@
-*.o
-single
-proc_spawn
-
+hey/
+.env
