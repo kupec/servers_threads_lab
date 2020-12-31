@@ -60,24 +60,19 @@ int main() {
 
 void run_worker(int sockfd) {
     pid_t pid = getpid();
-    //struct timespec delay = {0, 1 * 1000 * 1000};
+    struct timespec delay = {0, 100 * 1000 * 1000};
 
     while (1) {
-        //printf("[%d]: waiting for request\n", pid);
         int clientfd = accept(sockfd, NULL, 0);
         if (clientfd < 0) {
-            //printf("cannot accept: %d", -clientfd);
+            printf("cannot accept: %d", -clientfd);
             continue;
         }
 
-        //printf("[%d]: new request\n", pid);
-
         read(clientfd, &buf, sizeof(buf));
-        //nanosleep(&delay, NULL);
+        nanosleep(&delay, NULL);
 
         write(clientfd, http_answer, strlen(http_answer));
         close(clientfd);
-        
-        //printf("[%d]: responded\n", pid);
     }
 }

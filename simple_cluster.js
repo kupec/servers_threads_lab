@@ -14,6 +14,8 @@ if (cluster.isMaster) {
     });
 } else {
     http.createServer((req, res) => {
-        res.end('GOOD');
+        setTimeout(() => {
+            res.end('GOOD');
+        }, 100);
     }).listen(3001);
 }

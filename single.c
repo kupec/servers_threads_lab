@@ -36,7 +36,7 @@ int main() {
         die("cannot listen socket");
     }
 
-    struct timespec delay = {0, 1 * 1000 * 1000};
+    struct timespec delay = {0, 100 * 1000 * 1000};
 
     while (1) {
         int clientfd = accept(sockfd, NULL, 0);

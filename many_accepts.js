@@ -20,7 +20,9 @@ if (!process.env.SLAVE) {
 else {
     const answer = "GOOD: " + process.env.SLAVE; 
     http.createServer((req, res) => {
-        res.end(answer);
+        setTimeout(() => {
+            res.end(answer);
+        }, 100);
     }).listen({fd: 3});
 }
 
