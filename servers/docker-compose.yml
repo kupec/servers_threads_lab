@@ -1,0 +1,34 @@
+version: "3"
+services:
+    go_server:
+        build: go/server
+        ports:
+            - 3001:3001
+
+    nodejs_simple_cluster:
+        build:
+            context: nodejs
+            dockerfile: Dockerfile_simple_cluster
+        ports:
+            - 3002:3001
+
+    nodejs_many_accepts:
+        build:
+            context: nodejs
+            dockerfile: Dockerfile_many_accepts
+        ports:
+            - 3003:3001
+
+    c_single:
+        build:
+            context: c
+            dockerfile: Dockerfile_single
+        ports:
+            - 3004:3001
+
+    c_proc_spawn:
+        build:
+            context: c
+            dockerfile: Dockerfile_proc_spawn
+        ports:
+            - 3005:3001

@@ -1,0 +1,6 @@
+FROM node:12-alpine
+
+WORKDIR /app
+COPY simple_cluster.js app.js
+
+ENTRYPOINT ["node", "app.js"]

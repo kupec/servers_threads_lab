@@ -5,4 +5,16 @@ if [[ ! -d hey ]]; then
     git clone https://github.com/rakyll/hey.git
 fi;
 
-docker-compose -f docker-compose.hey.yml run hey -n "$REQUEST_COUNT" -c "$CONCURRENCY" "http://$HOST:3001"
+function hey {
+    docker-compose -f docker-compose.hey.yml run hey "$@"
+}
+
+for PORT in $(seq "$START_PORT" "$END_PORT"); do
+    echo "======================"
+    echo "|    PORT = $PORT    |"
+    echo "======================"
+
+    hey -n "$REQUEST_COUNT" -c "$CONCURRENCY" "http://$HOST:$PORT"
+
+    echo; echo;
+done;

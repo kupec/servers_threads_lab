@@ -1,0 +1,11 @@
+FROM alpine as builder
+
+RUN apk update && apk add build-base
+
+WORKDIR /app
+COPY single.c .
+RUN gcc -o app single.c
+
+FROM alpine
+COPY --from=builder /app/app /app
+ENTRYPOINT ["/app"]
