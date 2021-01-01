@@ -38,7 +38,8 @@ int main() {
         die("cannot listen socket");
     }
 
-    int worker_count = 16;
+    char* WORKER_COUNT = getenv("WORKER_COUNT");
+    int worker_count = WORKER_COUNT ? atoi(WORKER_COUNT) : 2;
     pid_t pid_list[worker_count];
 
     for (int i = 0; i < worker_count; i++) {

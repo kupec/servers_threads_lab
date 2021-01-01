@@ -1,10 +1,10 @@
 # C
 
 ## single
-one process/thread with listen/accept. Throttling in pre-accepting queue
+one process/thread with listen/accept. Throttling in pre-accepting queue. Very bad performance
 
 ## proc\_spawn
-many workers (processes), each accepting connections. Good performance but we need more workers due to blocking api. Throttling in memory/process count when many workers. Throttling in pre-accepting queue when few workers.
+many workers (processes), each accepting connections. Good performance but we need many workers (1000) due to blocking api. Throttling in memory/process count when many workers. Throttling in pre-accepting queue when few workers.
 
 # NodeJS
 

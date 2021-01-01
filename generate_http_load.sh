@@ -14,7 +14,7 @@ for PORT in $(seq "$START_PORT" "$END_PORT"); do
     echo "|    PORT = $PORT    |"
     echo "======================"
 
-    hey -n "$REQUEST_COUNT" -c "$CONCURRENCY" "http://$HOST:$PORT"
+    hey -n "$REQUEST_COUNT" -c "$CONCURRENCY" -t "$REQUEST_TIMEOUT" "http://$HOST:$PORT"
 
     echo; echo;
 done;
