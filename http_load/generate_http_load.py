@@ -58,11 +58,15 @@ def handle_commands(s):
 
         s.send(f'{option}\n'.encode())
         ready_message =  read_message(s)
-        if ready_message != 'OK':
+        if ready_message == 'OK':
+            print('Starting load generator')
+            os.system('./hey.sh')
+        else:
             print(f'Unknown response: {ready_message}')
-            continue
 
-        os.system('./hey.sh')
+        choice = input('q or list > ')
+        if choice == 'q':
+            break
 
 
 def load_env_vars():

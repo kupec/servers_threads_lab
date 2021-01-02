@@ -1,0 +1,14 @@
+version: "3"
+services:
+    backend:
+        build: .
+        volumes:
+            - ../servers:/servers
+            - /var/run/docker.sock:/var/run/docker.sock
+    
+    poetry:
+        build:
+            context: .
+            dockerfile: Dockerfile_poetry
+        volumes:
+            - .:/app

@@ -10,21 +10,21 @@ services:
             context: nodejs
             dockerfile: Dockerfile_simple_cluster
         ports:
-            - 3002:3001
+            - 3001:3001
 
     nodejs_many_accepts:
         build:
             context: nodejs
             dockerfile: Dockerfile_many_accepts
         ports:
-            - 3003:3001
+            - 3001:3001
 
     c_single:
         build:
             context: c
             dockerfile: Dockerfile_single
         ports:
-            - 3004:3001
+            - 3001:3001
 
     c_proc_spawn:
         build:
@@ -33,4 +33,4 @@ services:
         environment:
             - WORKER_COUNT=1000
         ports:
-            - 3005:3001
+            - 3001:3001
