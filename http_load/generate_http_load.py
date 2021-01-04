@@ -2,31 +2,36 @@ import socket
 import os
 import subprocess
 
-BUFFER_SIZE = 1024
-receive_buffer = bytes()
-receive_message_queue = []
 
-def read_message(s):
-    global receive_message_queue
-    global receive_buffer
+class SocketIO:
+    BUFFER_SIZE = 1024
 
-    while len(receive_message_queue) == 0:
-        chunk = s.recv(BUFFER_SIZE)
-        if len(chunk) == 0:
-            raise Exception("control server has been shutdown or crashed")
+    def __init__(self, s):
+        self.s = s
+        self.receive_buffer = bytes()
+        self.receive_message_queue = []
 
-        receive_buffer += chunk
-        messages = receive_buffer.split(b'\n')
+    def write(self, message):
+        self.s.send(f'{message}\n'.encode())
 
-        receive_message_queue = messages[0:-1]
-        receive_buffer = messages[-1]
+    def read(self):
+        while len(self.receive_message_queue) == 0:
+            chunk = self.s.recv(self.BUFFER_SIZE)
+            if len(chunk) == 0:
+                raise Exception("control server has been shutdown or crashed")
 
-    return receive_message_queue.pop(0).decode()
+            self.receive_buffer += chunk
+            messages = self.receive_buffer.split(b'\n')
+
+            self.receive_message_queue = messages[0:-1]
+            self.receive_buffer = messages[-1]
+
+        return self.receive_message_queue.pop(0).decode()
 
 
-def request_list(s):
-    s.send(b'list\n')
-    servers_message = read_message(s)
+def request_list(socketIO):
+    socketIO.write('list')
+    servers_message = socketIO.read()
     options = servers_message.split(',')
 
     yield from options
@@ -50,14 +55,15 @@ def filter_with_fzf(option_iter):
     return None
 
 
-def handle_commands(s):
+def handle_commands(socketIO):
     while True:
-        option = filter_with_fzf(request_list(s))
+        option = filter_with_fzf(request_list(socketIO))
         if not option:
             break
 
-        s.send(f'{option}\n'.encode())
-        ready_message =  read_message(s)
+        socketIO.write(option)
+        print('Waiting for server starting')
+        ready_message = socketIO.read()
         if ready_message == 'OK':
             print('Starting load generator')
             os.system('./hey.sh')
@@ -89,7 +95,7 @@ def start():
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((host, 3000))
-        handle_commands(s)
+        handle_commands(SocketIO(s))
 
 
 if __name__ == '__main__':

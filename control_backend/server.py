@@ -2,60 +2,58 @@ import os
 import socket
 import yaml
 
-BUFFER_SIZE = 1024
-receive_buffer = bytes()
-receive_message_queue = []
-server_options = []
 
-def write_message(s, message):
-    s.send(f'{message}\n'.encode())
+class SocketIO:
+    BUFFER_SIZE = 1024
+
+    def __init__(self, s):
+        self.s = s
+        self.receive_buffer = bytes()
+        self.receive_message_queue = []
+
+    def write(self, message):
+        self.s.send(f'{message}\n'.encode())
+
+    def read(self):
+        while len(self.receive_message_queue) == 0:
+            chunk = self.s.recv(self.BUFFER_SIZE)
+            if len(chunk) == 0:
+                return None
+
+            self.receive_buffer += chunk
+            messages = self.receive_buffer.split(b'\n')
+
+            self.receive_message_queue = messages[0:-1]
+            self.receive_buffer = messages[-1]
+
+        return self.receive_message_queue.pop(0).decode()
 
 
-def read_message(s):
-    global receive_message_queue
-    global receive_buffer
-
-    while len(receive_message_queue) == 0:
-        chunk = s.recv(BUFFER_SIZE)
-        if len(chunk) == 0:
-            return None
-
-        receive_buffer += chunk
-        messages = receive_buffer.split(b'\n')
-
-        receive_message_queue = messages[0:-1]
-        receive_buffer = messages[-1]
-
-    return receive_message_queue.pop(0).decode()
-
-
-def handle_commands(s):
+def handle_commands(socketIO, server_options):
     while True:
-        command = read_message(s)
+        command = socketIO.read()
 
         if not command:
             break
 
         if command == 'list':
-            write_message(s, ','.join(server_options))
+            socketIO.write(','.join(server_options))
         elif command in server_options:
             os.system('./stop_servers.sh')
             os.system(f'./start_server.sh {command}')
-            write_message(s, 'OK')
+            socketIO.write('OK')
         else:
-            write_message(s, f'Bad command: {command}')
+            socketIO.write(f'Bad command: {command}')
 
 
 def load_servers_options():
-    global server_options
-
     with open('/servers/docker-compose.yml', 'r') as f:
         config = yaml.load(f, Loader=yaml.Loader)
-    server_options = config['services'].keys()
+    return config['services'].keys()
 
 
 def start():
-    load_servers_options()
+    server_options = load_servers_options()
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as ss:
         ss.bind(('0.0.0.0', 3000))
@@ -64,7 +62,8 @@ def start():
         try:
             while True:
                 s, _ = ss.accept()
-                handle_commands(s)
+                with s:
+                    handle_commands(SocketIO(s), server_options)
         finally:
             os.system(f'./stop_servers.sh')
 

@@ -6,6 +6,6 @@ if [[ ! -d hey ]]; then
 fi;
 
 docker build -t hey hey
-docker-compose build http_load
+docker build -t http_load .
 
-docker-compose run http_load
+docker run --rm -it http_load
