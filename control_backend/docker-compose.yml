@@ -2,6 +2,8 @@ version: "3"
 services:
     backend:
         build: .
+        environment:
+            - SERVERS_PATH=/servers
         volumes:
             - ../servers:/servers
             - /var/run/docker.sock:/var/run/docker.sock

@@ -1,6 +1,13 @@
 import os
 import socket
 import yaml
+from pydantic import BaseModel
+
+
+class Settings(BaseModel):
+    HOST: str = '0.0.0.0'
+    PORT: int = 3000
+    SERVERS_PATH: str = '../servers'
 
 
 class SocketIO:
@@ -29,7 +36,7 @@ class SocketIO:
         return self.receive_message_queue.pop(0).decode()
 
 
-def handle_commands(socketIO, server_options):
+def handle_commands(socketIO, / , server_options, settings):
     while True:
         command = socketIO.read()
 
@@ -46,24 +53,26 @@ def handle_commands(socketIO, server_options):
             socketIO.write(f'Bad command: {command}')
 
 
-def load_servers_options():
-    with open('/servers/docker-compose.yml', 'r') as f:
+def load_servers_options(settings: Settings):
+    docker_compose_path = os.path.join(settings.SERVERS_PATH, 'docker-compose.yml')
+    with open(docker_compose_path, 'r') as f:
         config = yaml.load(f, Loader=yaml.Loader)
     return config['services'].keys()
 
 
 def start():
-    server_options = load_servers_options()
+    settings = Settings(**os.environ)
+    server_options = load_servers_options(settings)
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as ss:
-        ss.bind(('0.0.0.0', 3000))
+        ss.bind((settings.HOST, settings.PORT))
         ss.listen()
 
         try:
             while True:
                 s, _ = ss.accept()
                 with s:
-                    handle_commands(SocketIO(s), server_options)
+                    handle_commands(SocketIO(s), server_options=server_options, settings=settings)
         finally:
             os.system(f'./stop_servers.sh')
 
