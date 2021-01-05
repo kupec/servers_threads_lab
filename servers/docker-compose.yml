@@ -34,3 +34,9 @@ services:
             - WORKER_COUNT=1000
         ports:
             - 3001:3001
+
+    apache_httpd:
+        build:
+            context: apache_httpd
+        ports:
+            - 3001:80

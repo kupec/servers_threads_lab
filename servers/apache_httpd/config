@@ -1,0 +1,9 @@
+LoadModule lua_module modules/mod_lua.so
+
+<Files "*.lua">
+    SetHandler lua-script
+</Files>
+
+<Directory "/usr/local/apache2/htdocs">
+    DirectoryIndex index.lua
+</Directory>
