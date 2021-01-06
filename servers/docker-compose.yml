@@ -35,8 +35,26 @@ services:
         ports:
             - 3001:3001
 
-    apache_httpd:
+    apache_httpd_event:
         build:
             context: apache_httpd
+            args:
+                - variant=event
+        ports:
+            - 3001:80
+
+    apache_httpd_worker:
+        build:
+            context: apache_httpd
+            args:
+                - variant=worker
+        ports:
+            - 3001:80
+
+    apache_httpd_prefork:
+        build:
+            context: apache_httpd
+            args:
+                - variant=prefork
         ports:
             - 3001:80

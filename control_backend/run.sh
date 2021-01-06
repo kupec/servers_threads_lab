@@ -6,4 +6,4 @@ docker-compose build
 cd -
 
 docker-compose build backend
-docker-compose run -p 3000:3000 backend
+docker-compose run --rm -p 3000:3000 backend

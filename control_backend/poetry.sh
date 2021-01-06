@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker-compose run poetry "$@"
+docker-compose run --rm poetry "$@"
