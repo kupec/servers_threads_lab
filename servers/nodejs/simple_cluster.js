@@ -17,5 +17,5 @@ if (cluster.isMaster) {
         setTimeout(() => {
             res.end('GOOD');
         }, 100);
-    }).listen(3001);
+    }).listen(80);
 }

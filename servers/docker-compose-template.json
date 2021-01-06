@@ -1,0 +1,12 @@
+[
+    ["go/server"],
+    ["nodejs", "simple_cluster"],
+    ["nodejs", "many_accepts"],
+    ["c", "single"],
+    ["c", "proc_spawn", {
+        "environment": ["WORKER_COUNT=1000"]
+    }],
+    ["apache_httpd", "prefork"],
+    ["apache_httpd", "worker"],
+    ["apache_httpd", "event"]
+]

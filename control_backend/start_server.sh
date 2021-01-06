@@ -2,4 +2,4 @@
 set -e
 
 cd /servers
-docker-compose up -d "$@"
+./docker-compose.sh up -d --remove-orphans "$@"

@@ -1,13 +1,13 @@
 import os
 import socket
-import yaml
 from pydantic import BaseModel
+import subprocess
+import json
 
 
 class Settings(BaseModel):
     HOST: str = '0.0.0.0'
     PORT: int = 3000
-    SERVERS_PATH: str = '../servers'
 
 
 class SocketIO:
@@ -54,9 +54,11 @@ def handle_commands(socketIO, / , server_options, settings):
 
 
 def load_servers_options(settings: Settings):
-    docker_compose_path = os.path.join(settings.SERVERS_PATH, 'docker-compose.yml')
-    with open(docker_compose_path, 'r') as f:
-        config = yaml.load(f, Loader=yaml.Loader)
+    make_process = subprocess.run(['./make_docker_compose_json.sh'], capture_output=True, text=True)
+    if make_process.returncode != 0:
+        raise Exception(f'Cannot generate docker-compose file: {make_process.stderr}')
+
+    config = json.loads(make_process.stdout)
     return config['services'].keys()
 
 

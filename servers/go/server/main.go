@@ -14,5 +14,5 @@ func good(w http.ResponseWriter, req *http.Request) {
 func main() {
 	http.HandleFunc("/", good)
 
-	http.ListenAndServe(":3001", nil)
+	http.ListenAndServe(":80", nil)
 }

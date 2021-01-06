@@ -2,7 +2,7 @@
 set -e
 
 cd ../servers
-docker-compose build
+./docker-compose.sh build
 cd -
 
 docker-compose build backend

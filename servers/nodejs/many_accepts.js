@@ -4,7 +4,7 @@ const net = require('net');
 const {fork} = require('child_process');
 
 if (!process.env.SLAVE) {
-    const server = net.createServer().listen(3001);
+    const server = net.createServer().listen(80);
 
     for (let i = 0; i < os.cpus().length; i++) {
         const worker = fork(__filename, [], {

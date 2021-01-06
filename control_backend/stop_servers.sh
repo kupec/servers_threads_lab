@@ -2,4 +2,4 @@
 set -e
 
 cd /servers
-docker-compose down
+./docker-compose.sh down --remove-orphans

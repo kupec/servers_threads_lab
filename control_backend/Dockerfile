@@ -6,6 +6,7 @@ COPY pyproject.toml poetry.lock ./
 RUN poetry install
 
 COPY server.py /
+COPY make_docker_compose_json.sh /
 COPY start_server.sh /
 COPY stop_servers.sh /
 ENTRYPOINT ["poetry", "run", "python", "/server.py"]
