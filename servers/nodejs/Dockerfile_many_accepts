@@ -1,6 +1,0 @@
-FROM node:12-alpine
-
-WORKDIR /app
-COPY many_accepts.js app.js
-
-ENTRYPOINT ["node", "app.js"]

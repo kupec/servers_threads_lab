@@ -1,6 +1,8 @@
 FROM node:12-alpine
 
+ARG variant
+
 WORKDIR /app
-COPY simple_cluster.js app.js
+COPY $variant.js app.js
 
 ENTRYPOINT ["node", "app.js"]
