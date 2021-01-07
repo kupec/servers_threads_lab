@@ -1,5 +1,5 @@
 #!/bin/sh
 set -e
 
-cd /servers
-./docker-compose.sh down --remove-orphans
+cd "$SERVERS_PATH"
+docker-compose -p servers down --remove-orphans

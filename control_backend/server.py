@@ -1,4 +1,5 @@
 import os
+import stat
 import socket
 from pydantic import BaseModel
 import subprocess
@@ -8,6 +9,7 @@ import json
 class Settings(BaseModel):
     HOST: str = '0.0.0.0'
     PORT: int = 3000
+    SERVERS_PATH: str = '../servers'
 
 
 class SocketIO:
@@ -54,17 +56,17 @@ def handle_commands(socketIO, / , server_options, settings):
 
 
 def load_servers_options(settings: Settings):
-    make_process = subprocess.run(['./make_docker_compose_json.sh'], capture_output=True, text=True)
-    if make_process.returncode != 0:
-        raise Exception(f'Cannot generate docker-compose file: {make_process.stderr}')
-
-    config = json.loads(make_process.stdout)
-    return config['services'].keys()
+    servers_path = settings.SERVERS_PATH
+    for dir_entry in os.listdir(servers_path):
+        dir_path = os.path.join(servers_path, dir_entry)
+        mode = os.stat(dir_path).st_mode
+        if stat.S_ISDIR(mode):
+            yield dir_entry
 
 
 def start():
     settings = Settings(**os.environ)
-    server_options = load_servers_options(settings)
+    server_options = list(load_servers_options(settings))
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as ss:
         ss.bind((settings.HOST, settings.PORT))

@@ -1,5 +1,5 @@
 #!/bin/sh
 set -e
 
-cd /servers
-./docker-compose.sh up -d --remove-orphans "$@"
+cd "$SERVERS_PATH/$1"
+docker-compose -p servers up -d --build --remove-orphans
