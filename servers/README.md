@@ -16,8 +16,7 @@ when many workers. Throttling in pre-accepting queue when there are few workers.
 ## simple\_cluster.js
 
 cluster solution. Master process accepting connections and send request to
-workers (processes) through unix sockets. Processes uses non-blocking api but
-throttle in CPU due to js probably. The nodejs doc states that this solution has
+workers (processes) through unix sockets. Processes uses non-blocking api. The nodejs doc states that this solution has
 better balancing than the next scheme
 
 ## many\_accepts.js
@@ -29,6 +28,10 @@ balancing. The balancing is OS job and OS do not have much information about
 this usecase - if process can call accept syscall, then it can process tcp
 connection even if his CPU is overloading. Due to async api using a process can
 accept many connections and the full load is on this process.
+
+## nginx+pm2 in cluster mode or fork mode
+
+due to nginx we have a half of power. Difference in modes is small and the same as in two previous variants - round robin balance scheme is more adequate for http load than OS process scheduling.
 
 # Golang
 

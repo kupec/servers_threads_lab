@@ -1,0 +1,4 @@
+FROM nginx:alpine
+COPY default.conf /etc/nginx/conf.d
+COPY setup_nginx.sh .
+RUN sh setup_nginx.sh
