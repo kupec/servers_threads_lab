@@ -55,23 +55,64 @@ def filter_with_fzf(option_iter):
     return None
 
 
+def handle_help_command(socketIO):
+    print('\n'.join([
+        'list - show servers list and run a selected one',
+        'run SERVER - run SERVER and make http load',
+        'runall - start `run` command for each server',
+        'q/quit - quit',
+    ]))
+
+
+def handle_run_command(server, socketIO):
+    socketIO.write(server)
+    print(f'Waiting for server {server} starting')
+    ready_message = socketIO.read()
+    if ready_message == 'OK':
+        print(f'Starting load generator for {server}')
+        os.system('./hey.sh')
+    else:
+        print(f'Unknown backend response: {ready_message}')
+
+
+def handle_list_command(socketIO):
+    option = filter_with_fzf(request_list(socketIO))
+    if not option:
+        return
+
+    handle_run_command(option, socketIO)
+
+
+def handle_run_all_command(socketIO):
+    for server in request_list(socketIO):
+        handle_run_command(server, socketIO)
+
+
+def handle_quit_command(socketIO):
+    return True
+
+
 def handle_commands(socketIO):
+    handlers_map = {
+        'list': handle_list_command,
+        'run': handle_run_command,
+        'runall': handle_run_all_command,
+        'help': handle_help_command,
+        'q': handle_quit_command,
+        'quit': handle_quit_command,
+    }
+
     while True:
-        option = filter_with_fzf(request_list(socketIO))
-        if not option:
-            break
+        command = input('command (or help) > ')
+        command_args = command.split(' ')
 
-        socketIO.write(option)
-        print('Waiting for server starting')
-        ready_message = socketIO.read()
-        if ready_message == 'OK':
-            print('Starting load generator')
-            os.system('./hey.sh')
-        else:
-            print(f'Unknown response: {ready_message}')
+        handler = handlers_map.get(command_args[0])
+        if not handler:
+            print('Unknown command, type help')
+            continue
 
-        choice = input('q or list > ')
-        if choice == 'q':
+        need_exit = handler(*command_args[1:], socketIO=socketIO)
+        if need_exit:
             break
 
 
