@@ -3,12 +3,13 @@
 Copy `.env.example` to `.env` and run:
 
 ```sh
-./generate_http_load.sh
+cd http_load
+./run.sh
 ```
 
-# run servers
+# run control backend
 
 ```sh
-cd servers
-docker-compose up -d
+cd control_backend
+./run.sh
 ```
