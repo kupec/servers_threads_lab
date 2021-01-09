@@ -55,7 +55,7 @@ def filter_with_fzf(option_iter):
     return None
 
 
-def handle_help_command(socketIO):
+def handle_help_command(socketIO, **kwargs):
     print('\n'.join([
         'list - show servers list and run a selected one',
         'run SERVER - run SERVER and make http load',
@@ -64,31 +64,55 @@ def handle_help_command(socketIO):
     ]))
 
 
-def handle_run_command(server, socketIO):
+def open_log_destination(server, **kwargs):
+    log_path = os.getenv('LOG_FILE').format(server)
+    return open(log_path, 'w')
+
+
+def run_load_generator(server):
+    concurrency = os.getenv('CONCURRENCY')
+    request_timeout = os.getenv('REQUEST_TIMEOUT')
+    total_timeout = os.getenv('TOTAL_TIMEOUT')
+    host = os.getenv('HOST')
+
+    with open_log_destination(server) as log_file:
+        subprocess.run(
+            [
+                'hey',
+                '-c', concurrency,
+                '-t', request_timeout,
+                '-z', f'{total_timeout}s',
+                f'http://{host}:3001',
+            ],
+            stdout=log_file
+        )
+
+
+def handle_run_command(server, /, socketIO, **kwargs):
     socketIO.write(server)
     print(f'Waiting for server {server} starting')
     ready_message = socketIO.read()
     if ready_message == 'OK':
         print(f'Starting load generator for {server}')
-        os.system('./hey.sh')
+        run_load_generator(server)
     else:
         print(f'Unknown backend response: {ready_message}')
 
 
-def handle_list_command(socketIO):
+def handle_list_command(socketIO, **kwargs):
     option = filter_with_fzf(request_list(socketIO))
     if not option:
         return
 
-    handle_run_command(option, socketIO)
+    handle_run_command(option, socketIO=socketIO, **kwargs)
 
 
-def handle_run_all_command(socketIO):
+def handle_run_all_command(socketIO, **kwargs):
     for server in request_list(socketIO):
-        handle_run_command(server, socketIO)
+        handle_run_command(server, socketIO, **kwargs)
 
 
-def handle_quit_command(socketIO):
+def handle_quit_command(socketIO, **kwargs):
     return True
 
 
@@ -116,23 +140,8 @@ def handle_commands(socketIO):
             break
 
 
-def load_env_vars():
-    result = {}
-
-    with open('.env', 'r') as f:
-        data = f.read()
-        for line in data.split('\n'):
-            tokens = [x.strip() for x in line.split('=')]
-            if len(tokens) == 2:
-                key, value = tokens
-                result[key] = value
-
-    return result
-
-
 def start():
-    envs = load_env_vars()
-    host = envs['HOST']
+    host = os.getenv('HOST')
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((host, 3000))

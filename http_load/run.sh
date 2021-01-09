@@ -8,4 +8,8 @@ fi;
 docker build -t hey hey
 docker build -t http_load .
 
-docker run --rm -it http_load
+docker run --rm \
+    --env-file .env \
+    -v "$PWD/reports:/reports" \
+    -e "LOG_FILE=/reports/{}.log" \
+    -it http_load
