@@ -70,10 +70,17 @@ void run_worker(int sockfd) {
             continue;
         }
 
-        read(clientfd, &buf, sizeof(buf));
-        nanosleep(&delay, NULL);
+        while (1) {
+            int count = read(clientfd, &buf, sizeof(buf));
+            if (count <= 0) {
+                break;
+            }
 
-        write(clientfd, http_answer, strlen(http_answer));
+            nanosleep(&delay, NULL);
+
+            write(clientfd, http_answer, strlen(http_answer));
+        }
+
         close(clientfd);
     }
 }
