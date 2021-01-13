@@ -1,0 +1,10 @@
+LoadModule cgid_module modules/mod_cgid.so
+
+<Files "*.cgi">
+    SetHandler cgi-script
+</Files>
+
+<Directory "/usr/local/apache2/htdocs">
+    Options +ExecCGI
+    DirectoryIndex app.cgi
+</Directory>
