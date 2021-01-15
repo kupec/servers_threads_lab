@@ -9,6 +9,8 @@ FROM nginx:alpine
 RUN apk update && apk add fcgiwrap
 RUN mkdir /fcgi && chmod 777 /fcgi
 COPY default.conf /etc/nginx/conf.d
+COPY setup_nginx.sh .
+RUN ./setup_nginx.sh
 COPY --from=builder /app/app /fcgi/app
 COPY entrypoint.sh .
 ENTRYPOINT ["./entrypoint.sh"]
