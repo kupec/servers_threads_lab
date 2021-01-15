@@ -61,3 +61,13 @@ The same as previous two solution but have fix for keep-alive connections. In
 case of keep-alive connections all workers can be in blocked state however they
 are idle because http client do not send any requests. For simple connection
 this variant is not better than previous two variants.
+
+# CGI
+
+## apache httpd + mod\_cgid
+
+Bad performance due to spawning a new process on each request
+
+## nginx + fcgiwrap
+
+Performance is better than cgi on apache httpd but it is slighly worse than apache\_httpd\_event which do not spawn new processes.
