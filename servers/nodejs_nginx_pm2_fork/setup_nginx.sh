@@ -9,5 +9,6 @@ let "MAX_PORT = CPU_COUNT - 1 + 3000"
     for PORT in $(seq 3000 $MAX_PORT); do
         echo "    server backend:$PORT;";
     done;
+    echo "    keepalive 250;";
     echo "}";
 } >> /etc/nginx/conf.d/default.conf
