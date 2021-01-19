@@ -1,0 +1,12 @@
+version: "3"
+services:
+    backend:
+        build:
+            context: .
+
+    lb:
+        build:
+            context: .
+            dockerfile: Dockerfile_nginx
+        ports:
+            - 3001:80
