@@ -1,7 +1,10 @@
-FROM node:12-alpine
+FROM nginx:alpine
+RUN apk update && apk add nodejs npm 
 RUN npm install -g pm2
 
 WORKDIR /app
 COPY app.js .
+COPY default.conf /etc/nginx/conf.d
+COPY entrypoint.sh .
 
-ENTRYPOINT ["pm2", "start", "app.js", "-i", "max", "--no-daemon"]
+ENTRYPOINT ["./entrypoint.sh"]
