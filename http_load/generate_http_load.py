@@ -39,16 +39,16 @@ def request_list(socketIO):
 
 def filter_with_fzf(option_iter):
     try:
-        fzf_process = subprocess.Popen(['fzf'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        fzf_process = subprocess.Popen(['fzf', '-m'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
         for option in option_iter:
             fzf_process.stdin.write(f'{option}\n'.encode())
         fzf_process.stdin.close();
 
-        option = fzf_process.stdout.read().decode().strip()
+        options = fzf_process.stdout.read().decode().strip().split('\n')
         code = fzf_process.wait()
         if code == 0:
-            return option
+            return options
     except:
         fzf_process.kill()
 
@@ -100,11 +100,10 @@ def handle_run_command(server, /, socketIO, **kwargs):
 
 
 def handle_list_command(socketIO, **kwargs):
-    option = filter_with_fzf(request_list(socketIO))
-    if not option:
-        return
+    options = filter_with_fzf(request_list(socketIO))
 
-    handle_run_command(option, socketIO=socketIO, **kwargs)
+    for option in options:
+        handle_run_command(option, socketIO=socketIO, **kwargs)
 
 
 def handle_run_all_command(socketIO, **kwargs):
