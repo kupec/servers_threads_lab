@@ -86,6 +86,8 @@ void close_client(struct client_t *client) {
     //log_client(client, "Closing socket");
     close(client->fd);
     client->fd = 0;
+    client->expire_at.tv_sec = 0;
+    client->expire_at.tv_nsec = 0;
 }
 
 void handle_client_read(struct client_t *client, struct timespec *now) {
@@ -135,6 +137,35 @@ void handle_timers(struct timespec *now) {
     }
 }
 
+struct timeval get_time_delta(struct timespec from, struct timespec to) {
+    struct timeval result = {0, 0};
+    if (to.tv_sec < from.tv_sec) {
+        return result;
+    }
+    if ((to.tv_sec == from.tv_sec) && (to.tv_nsec < from.tv_nsec)) {
+        return result;
+    }
+
+    result.tv_sec = to.tv_sec - from.tv_sec;
+    result.tv_usec = (to.tv_nsec - from.tv_nsec) / 1000;
+    if (result.tv_usec < 0) {
+        result.tv_usec += 1000 * 1000;
+        result.tv_sec--;
+    }
+
+    return result;
+}
+
+int is_timeval_less(struct timeval a, struct timeval b) {
+    if (a.tv_sec < b.tv_sec) {
+        return 1;
+    }
+    if ((a.tv_sec == b.tv_sec) && (a.tv_usec < b.tv_usec)) {
+        return 1;
+    }
+    return 0;
+}
+
 int main() {
     int sockfd = socket(PF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
@@ -164,8 +195,14 @@ int main() {
         fd_set rfds;
         fd_set wfds;
         struct timeval timeout;
-        timeout.tv_sec = 0;
-        timeout.tv_usec = 20 * 1000;
+        struct timespec now;
+        timeout.tv_sec = 10;
+        timeout.tv_usec = 0;
+        if (clock_gettime(CLOCK_MONOTONIC, &now) < 0) {
+            perror("clock_gettime");
+            continue;
+        }
+
 
         FD_ZERO(&rfds);
         FD_ZERO(&wfds);
@@ -177,6 +214,13 @@ int main() {
             if (client->wait_write) {
                 FD_SET(client->fd, &wfds);
             }
+
+            if (client->expire_at.tv_sec && client->expire_at.tv_nsec) {
+                struct timeval wait_time = get_time_delta(now, client->expire_at);
+                if (is_timeval_less(wait_time, timeout)) {
+                    timeout = wait_time;
+                }
+            }
         }
         FD_SET(sockfd, &rfds);
 
@@ -186,12 +230,10 @@ int main() {
             exit(1);
         }
 
-        struct timespec now;
         if (clock_gettime(CLOCK_MONOTONIC, &now) < 0) {
             perror("clock_gettime");
             continue;
         }
-
 
         if (result == 0) {
             handle_timers(&now);
