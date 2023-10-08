@@ -1,0 +1,8 @@
+version: "3"
+services:
+    backend:
+        build: .
+        environment:
+            - WORKER_COUNT=250
+        ports:
+            - 3001:80
